@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>成绩系统</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <style>
+        #left-btn,#right-btn{
+            cursor: pointer;
+        }
+        .left{
+            height: 300px;width: 50px; text-align: center;
+        }
+        .right{
+            height: 300px;width: 50px; text-align: center;margin-top: 30px;
+        }
+        .update-btn{
+            cursor: pointer;
+        }
+        #trash{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 100%";>
+    <div style="float: left;" class="left">
+        <span onclick="pre()" class="glyphicon glyphicon-chevron-left" style="font-size: 30px;margin-top: 30px;" id="left-btn"></span>
+    </div>
+    <div style="width:88%; margin: 0 auto; float: left;">
+        <div style="width: 100%; text-align: center;">
+            <h3><strong id="time"></strong></h3>
+            <span id="trash" style="font-size: 9px;color: #46b8da;font-weight: bolder"><span class="glyphicon glyphicon-trash"></span>&nbsp;删除</span>
+        </div>
+        <table class="table table-striped">
+            <thead>
+            <tr style="background: rgba(40,147,147,0.5);">
+                <th>序号</th>
+                <th>姓名</th>
+                <th>学号</th>
+                <th>分数<span id="score" style="color: #F0433D;font-size: 9px;"></span></th>
+                <th>排名</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+
+            <tbody id="content">
+
+            </tbody>
+        </table>
+    </div>
+    <div style="float: left;" class="right">
+        <span onclick="next()" class="glyphicon glyphicon-chevron-right" style="display:none;font-size: 30px;" id="right-btn"></span>
+    </div>
+</div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="trashModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width: 400px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div style="width: 100%;padding: 20px;">
+                <span style="font-weight: bolder;">确认删除该次成绩？<span style="font-size: 9px;color: #F0433D">（操作不可恢复）</span></span>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" id="undo-btn">再想想</button>
+                <button class="btn btn-success" id="do-btn">确认</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script>
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+
+    var classId;
+    var index = 0;
+    var r = 0;
+
+    window.onload = function () {
+        classId = getQueryString('classId');
+ //       alert(classId);
+        showScore(classId,index);
+    }
+
+    function showScore(classId,date){
+ //       alert(date);
+        if(date == 0){
+            $("#right-btn").css('display','none');
+        }else{
+            $("#right-btn").css('display','');
+        }
+        $.ajax({
+            url: "/score/class/"+classId+"/"+date,
+            //type、contentType必填,指明传参方式
+            type: "GET",
+            dataType:"json",//返回类型值为json
+            success: function(response){
+                //前端调用成功后，可以处理后端传回的json格式数据。
+//                alert(response.message);
+                if(response.success){
+//                    alert(response.success);
+                    console.log(response.result.classScore);
+                    if( response.result.r == -1 ){
+                        r = -1;
+                    }else{
+                        r = 0;
+                    }
+                    if( r == -1 ){
+                        $("#left-btn").css('display','none');
+                    }else{
+                        $("#left-btn").css('display','');
+                    }
+                    var xuhao = 1;
+                    for( var i = 0; i < response.result.classScore.length; i++ ){
+                        var obj = response.result.classScore[i];
+                        var stu = response.result.classStudent[i];
+                        var text = '<tr>\n' +
+                            '                <td>'+xuhao+'</td>\n' +
+                            '                <td>'+stu.stuName+'</td>\n' +
+                            '                <td>'+obj.stuId+'</td>\n' +
+                            '                <td style="color: #1CC09F; font-weight: bolder">'+obj.score+'</td>\n' +
+                            '                <td style="color: #c7254e; font-weight: bolder">'+xuhao+'</td>\n' +
+                            '                <td><span style="color: #00bf72" class="update-btn" onclick="update(this)">修改&nbsp;</span></td>\n' +
+                            '            </tr>'
+                        $("#content").append(text);
+                        xuhao++;
+                    }
+                    var main = response.result.scoreMain;
+                    $("#time").text(main.scoDate.substring(0,10));
+                    var sc = '('+main.totalScore+')';
+                    $("#score").text(sc);
+                }else{
+                    alert("查询失败！");
+                }
+            }
+        });
+    }
+
+    $("#trash").on('click',function(){
+        $("#trashModal").modal('show');
+    })
+
+    $("#do-btn").on('click',function(){
+ //       alert('删除成功！'+index);
+        $("#trashModal").modal('hide');
+        $.ajax({
+            url: "/score/delete/"+classId+"/"+index,
+            type: "POST",
+            dataType:"json",//返回类型值为json
+            success: function(response){
+                if(response.success){
+                    alert("删除成功！");
+                    index--;
+                    $("#content").empty();
+                    showScore(classId,index);
+                }else{
+                    alert("删除失败！");
+                }
+            }
+        });
+    })
+
+    function pre() {
+        index = index+1;
+        $("#content").empty();
+        showScore(classId,index);
+    }
+
+    function next(){
+        index = index - 1;
+        $("#content").empty();
+        showScore(classId,index);
+    }
+
+    var preScore = {};
+    function update(obj){
+        var parent = $(obj).parent().parent();
+  //      alert($(parent).children().eq(2).text());
+        $(obj).parent().html('<button class="btn btn-default btn-xs" onclick="doUpdate(this)">确认</button><button class="btn btn-default btn-xs" onclick="undoUpdate(this)">取消</button>');
+        var id = $(parent).children().eq(2).text();
+ //       alert(id);
+        preScore[id] = $(parent).children().eq(3).text();
+ //       alert(preScore[id]);
+        $(parent).children().eq(3).html('<input type="text" class="form-control" style="margin:0 auto;width: 70px;" value="'+preScore[id]+'">');
+    }
+
+    function undoUpdate(obj){
+        var parent = $(obj).parent().parent();
+        $(obj).parent().html('<span style="color: #00bf72" class="update-btn" onclick="update(this)">修改&nbsp;</span>');
+        var id = $(parent).children().eq(2).text();
+        $(parent).children().eq(3).html(preScore[id]);
+    }
+
+    function doUpdate(obj){
+        var parent = $(obj).parent().parent();
+        $(obj).parent().html('<span style="color: #00bf72" class="update-btn" onclick="update(this)">修改&nbsp;</span>');
+        var id = $(parent).children().eq(2).text();
+        var new_score = $($(parent).children().eq(3)).children().eq(0).val();
+        $(parent).children().eq(3).html(new_score);
+        $.ajax({
+            url: "/score/update/"+id+"/"+classId+"/"+index+"/"+new_score,
+            //type、contentType必填,指明传参方式
+            type: "POST",
+            dataType:"json",//返回类型值为json
+            success: function(response){
+                if(response.success){
+                    $("#content").empty();
+                    showScore(classId,index);
+                }else{
+                    alert("更新失败！");
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册新生</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <style>
+    </style>
+</head>
+<body>
+<div style="width: 100%">
+    <div style="width: 100%;text-align: center;">
+        <h3 style="color: #555555;font-weight: bolder;">新生入校</h3>
+    </div>
+    <div style="border: #cccccc 1px solid; width: 100%; height: 150px; margin-top: 70px; border-radius: 10px;">
+        <div style="width: 100%;margin-top: 50px;margin-left: 50px;">
+            <span style="float: left;margin-top: 5px;"><strong>姓名</strong></span>
+            <input class="form-control"style="float: left;width: 120px;margin-left: 10px;" id="name">
+            <span style="float: left;margin-top: 5px;margin-left:10px;color: #F0433D">*</span>
+
+            <span style="float: left;margin-top: 5px;margin-left: 20px;"><strong>性别</strong></span>
+            <select class="form-control" style="float: left;width: 100px;margin-left: 10px;" id="sex">
+                <option value="1">男</option>
+                <option value="0">女</option>
+            </select>
+            <span style="float: left;margin-top: 5px;margin-left:10px;color: #F0433D">*</span>
+
+            <span style="float: left;margin-top: 5px;margin-left: 20px;"><strong>电话号码</strong></span>
+            <input class="form-control" style="float: left;width: 150px;margin-left: 10px;" id="phone">
+            <span style="float: left;margin-top: 5px;margin-left:10px;color: #F0433D">*</span>
+
+            <div style="float: left;margin-left: 30px; width: 100px;">
+                <input type="button" class="btn btn-success" style="width: 100%;" value="下一步" onclick="next()">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script>
+    function next(){
+        var name = $("#name").val();
+        var sex = $("#sex").val();
+        var phone = $("#phone").val();
+        if(name == '' || phone == ''){
+            alert('* 为必填项！');
+            return;
+        }
+        if(phone.length != 11){
+            alert("手机号不正确！");
+            return;
+        }
+        // alert(name);
+        // alert(sex);
+        // alert(phone);
+        sessionStorage.setItem('name',name);
+        sessionStorage.setItem('sex',sex);
+        sessionStorage.setItem('phone',phone);
+        window.location = 'admin-register-course.html';
+    }
+</script>
+</body>
+</html>

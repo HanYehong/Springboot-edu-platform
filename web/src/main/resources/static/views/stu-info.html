@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>个人信息</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <style>
+        ::-webkit-scrollbar{
+            display:none;
+        }
+        .round_icon {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .subject{
+            width: 100px;
+            height: 100px;
+            margin-right: 30px;
+            float: left;
+            text-align: center;
+            box-shadow:5px 2px 6px #2B2E33;
+            transform: rotate(-0deg);
+            cursor: pointer;
+        }
+        .subject:hover{
+            box-shadow:5px 4px 8px #00bf72;
+            transform: rotate(-3deg);
+        }
+        .subject-font{
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .subject-font-parent{
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<!-- /. NAV SIDE  -->
+<div id="page-wrapper" >
+    <div id="page-inner">
+        <div class="row">
+            <div class="col-md-12">
+                <div style="width: 100%">
+                    <div style="width: 80px;height: 80px;margin: 0 auto;">
+                        <img src="../images/tx_man.jpg" class="round_icon" id="tx">
+                    </div>
+                    <div style="width: 100%;margin-top: 50px;">
+                        <table class="table table-hover table-bordered table-striped" style="width: 70%;margin: 0 auto;">
+                            <tr>
+                                <td><b>姓名</b></td><td id="name">Name</td>
+                            </tr>
+                            <tr>
+                                <td><b>学号</b></td><td id="id">000000</td>
+                            </tr>
+                            <tr>
+                                <td><b>性别</b></td><td id="sex">男</td>
+                            </tr>
+                            <tr>
+                                <td><b>电话</b></td><td id="phone">00000000000</td>
+                            </tr>
+                            <tr>
+                                <td><b>入学时间</b></td><td id="time">1972-1-1</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div style="width: 100%">
+                    <div style="width:100px;margin: 0 auto;">
+                        <h3>你的课程</h3>
+                    </div>
+                    <hr>
+                    <div style="margin-left: 50px;" id="subject-show">
+
+                    </div>
+                </div>
+            </div>
+            <!-- /. PAGE INNER  -->
+        </div>
+        <!-- /. PAGE WRAPPER  -->
+    </div>
+</div>
+<!-- JS Scripts-->
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<!-- Custom Js -->
+<script src="../assets/js/custom-scripts.js"></script>
+<script>
+    window.onload=function(){
+        var color = new Array();
+        color[0] = "#E1E18F";
+        color[1] = "#288D8D";
+        color[2] = "#8BA354";
+        color[3] = "#9372A3";
+        color[4] = "#E18FE1";
+//            alert(1);
+        var sessionObj = JSON.parse(sessionStorage.getItem("stuInfo"));
+        $.ajax({
+            url: "/course/stucourse/"+sessionObj.people.stuId,
+            //type、contentType必填,指明传参方式
+            type: "GET",
+            contentType: "application/json;charset=utf-8",
+            success: function(response){
+                //前端调用成功后，可以处理后端传回的json格式数据。
+//                alert(response.message);
+                if(response.success){
+                    console.log(response.result.stuANDcour);
+                    $("#name").text(sessionObj.people.stuName);
+                    $("#id").text(sessionObj.people.stuId);
+                    if(sessionObj.people.stuSex == 1){
+                        $("#sex").text("男");
+                        $("#tx").attr("src","../images/tx_man.jpg");
+                    }else{
+                        $("#sex").text("女");
+                        $("#tx").attr("src","../images/tx_woman.jpg");
+                    }
+                    $("#phone").text(sessionObj.people.stuPhone);
+                    $("#time").text(sessionObj.people.createTime.substring(0,10));
+                    for( var i = 0; i < response.result.course.length; i++ ){
+                        var text = '<div class="subject" style="background: '+color[i%5]+';"><div class="subject-font-parent"><span class="subject-font">'+response.result.course[i].courName+'</span></div></div>';
+                        $("#subject-show").append(text);
+                    }
+                    var cour = {course:response.result.course,courseName:response.result.courseName,teaName:response.result.teaName, courseTime:response.result.courseTime, stuANDcour: response.result.stuANDcour};
+                    sessionStorage.setItem("course",JSON.stringify(cour));
+                    console.log(cour);
+                }else{
+                    alert("查询课程失败！");
+                }
+            }
+        });
+
+        //           alert(sessionObj);
+//            alert(sessionObj.people.stuId);
+    }
+</script>
+</body>
+</html>

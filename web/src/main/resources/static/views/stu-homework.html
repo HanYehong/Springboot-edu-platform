@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>作业系统</title>
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <!-- Online Bootstrap and jquery -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        body{
+            background: #f3f3f3;
+        }
+    </style>
+</head>
+<body>
+<div id="all-work">
+
+</div>
+<script>
+    $(function () { $('#collapseOne').collapse('hide')});
+    $(function () { $('#collapseTwo').collapse('hide')});
+    window.onload = function () {
+        $.ajax({
+            url: "/homework/"+JSON.parse(sessionStorage.getItem("stuInfo")).people.stuId,
+            type: "GET",
+            contentType: "application/json;charset=utf-8",
+            success: function(response){
+                if(response.success){
+           //         alert("成功");
+                    var homework = response.result.homework;
+                    var homeworkDo = response.result.homeworkDo;
+                    var course = response.result.course;
+                    for(var i = 0; i < homework.length; i++){
+                        var d = new Date(homework[i].createTime);
+                        var date = new Date();
+                        var time_begin=d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+                        d = new Date(homework[i].hwDeadtime);
+                        var time_end = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+                        var isComp = '#00bf72';
+                        var isCompText = '已完成';
+                        if(homeworkDo[i].createTime == null){
+                            if(date.getFullYear() > d.getFullYear() || date.getMonth()+1 > (d.getMonth() + 1) || date.getDate()>d.getDate()){
+                                isComp = '#8A8A8A';
+                                isCompText = '已过期'
+                            }else{
+                                isComp = '#ffb53e';
+                                isCompText = '未完成'
+                            }
+                        }
+                        var text = '<div class="panel panel-success">\n' +
+                            '        <div class="panel-heading" style="background: #dcdcdc">\n' +
+                            '            <h4 class="panel-title">\n' +
+                            '                <a data-toggle="collapse" data-parent="#accordion"\n' +
+                            '                   href="#collapse-'+i+'">\n' +
+                            '                    <span><strong>布置时间&nbsp;</strong>'+time_begin+'</span>\n' +
+                            '                    <span style="margin-left: 110px;"><strong>科目&nbsp;</strong> '+course[i].courName+'</span>\n' +
+                            '                    <span style="margin-left: 110px;"><strong>截止时间&nbsp;</strong> '+time_end+'</span>\n' +
+                            '                    <span style="color: '+isComp+'; float: right;" ><strong>'+isCompText+'</strong></span>\n' +
+                            '                </a>\n' +
+                            '            </h4>\n' +
+                            '        </div>\n' +
+                            '        <div id="collapse-'+i+'" class="panel-collapse collapse in">\n' +
+                            '            <div class="panel-body">\n' +
+                            '                <p>'+homework[i].hwContent+'</p>\n';
+                        if(homeworkDo[i].createTime == null){
+                            if(date.getFullYear() > d.getFullYear() || date.getMonth()+1 > (d.getMonth() + 1) || date.getDate()>d.getDate()){
+                                text = text + '<div style="display: table-cell; vertical-align: middle; text-align: center; margin-top: 10px; border: 1px solid; width: 70px; height: 40px; color: #8A8A8A">\n' +
+                                    '                    <span><strong>已过期</strong></span>\n' +
+                                    '                </div>\n';
+                            }else{
+                                text = text + '<div id="content-'+homework[i].id+'">\n' +
+                                    '                    <div style="margin-top: 10px;">\n' +
+                                    '                        <textarea id="work-area-'+homework[i].id+'" style="width: 500px; height: 150px;"></textarea>\n' +
+                                    '                    </div>\n' +
+                                    '                    <div style="margin-top: 10px;">\n' +
+                                    '                        <button class="btn btn-success" onclick="submitWork('+homework[i].id+')" style="width: 70px;">提交</button>\n' +
+                                    '                    </div>\n' +
+                                    '                </div>';
+                            }
+                        }else{
+                            text = text + '<div style="display: table-cell; vertical-align: middle; text-align: center; margin-top: 10px; border: 1px solid; width: 70px; height: 40px; color: #00bf72">\n' +
+                            '                    <span><strong>已完成</strong></span>\n' +
+                            '                </div>\n';
+                        }
+                        text = text +
+                        '            </div>\n' +
+                        '        </div>\n' +
+                        '    </div>';
+                        $("#all-work").append(text);
+                        $('#collapse-'+i).collapse('hide');
+                    }
+                }else{
+                    alert("失败");
+                }
+            }
+        });
+    }
+
+    function submitWork(id){
+   //     alert(id);
+        var content = $("#work-area-"+id).val();
+  //      alert(content);
+        $.ajax({
+            url: "/homework/submit/"+JSON.parse(sessionStorage.getItem("stuInfo")).people.stuId+"/"+id+"/"+content,
+            async : true,
+            type: "post",
+            dataType:"json",//返回类型值为json
+            success: function (data) {
+                if(data.success){
+                    window.location.reload();
+                }else{
+                    alert("提交失败！");
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

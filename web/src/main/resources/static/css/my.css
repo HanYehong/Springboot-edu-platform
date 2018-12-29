@@ -1,0 +1,10 @@
+body{
+    background: #f3f3f3;
+    overflow-x:hidden;
+}
+tr,th,td{
+    text-align: center;
+}
+::-webkit-scrollbar{
+    display:none;
+}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+    http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+    <servlet>
+        <servlet-name>SendSmsServlet</servlet-name>
+        <servlet-class>com.yida.eduplatform.servlet.SendSmsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SendSmsServlet</servlet-name>
+        <url-pattern>sendSms</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Check</servlet-name>
+        <servlet-class>com.yida.eduplatform.servlet.CheckServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Check</servlet-name>
+        <url-pattern>check</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>test01.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>

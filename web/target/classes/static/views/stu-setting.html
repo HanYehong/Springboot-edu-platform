@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>个人设置</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Custom Styles-->
+    <link href="../assets/css/custom-styles.css" rel="stylesheet" />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <style>
+        .update-btn{
+            color: #00bf72;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div style="margin-top: 100px; margin-left: 250px;">
+    <div>
+        <div style="width: 80px; float: left;">
+            <span><strong>我的密码</strong></span>
+        </div>
+        <div style="margin-left: 30px; float: left; width: 170px;">
+            <span>******</span>
+        </div>
+        <div style="margin-left: 10px; float: left;" onclick="showChangePwd()">
+            <span class="update-btn"><strong>修改 ></strong></span>
+        </div>
+        <br>
+        <div style="display: none; margin-left: 110px;" id="change-pwd">
+            <input id="old-pwd" type="password" style="width: 200px; margin-top: 10px;" class="form-control" placeholder="原始密码"><br>
+            <input id="new-pwd" type="password" style="width: 200px;" class="form-control" placeholder="新密码"><br>
+            <input id="new-pwd2" type="password" style="width: 200px;" class="form-control" placeholder="确认密码">
+            <span style="margin-left: 10px;color: #F0433D; font-size: 15px; display: none;" id="label-nosame"><strong>两次密码不一致！</strong></span>
+            <br>
+            <button id="sure-change-pwd" onclick="changePwd()" class="btn btn-success" style="width: 100px; margin-top: 10px;">确认</button>
+        </div>
+    </div>
+    <br>
+    <div style="margin-top: 50px;">
+        <div style="width: 80px; float: left;">
+            <span><strong>我的手机号</strong></span>
+        </div>
+        <div style="margin-left: 30px; float: left; width: 170px;">
+            <span id="mobile">15189809881</span>
+        </div>
+        <div style="margin-left: 10px; float: left;" onclick="showChangePhone()">
+            <span class="update-btn"><strong>修改 ></strong></span>
+        </div>
+        <br>
+        <div style="display: none; margin-left: 110px;" id="change-phone">
+            <input type="text" style="width: 200px;margin-top: 10px;" id="new-phone" class="form-control" placeholder="新手机号"><br>
+            <div>
+                <input type="text" style="float:left;width: 100px;margin-top: 10px;" id="code" class="form-control" placeholder="验证码">
+                <button class="btn btn-default" id="getCode" onclick="send()" style="float:left;width: 100px;margin-left: 5px; margin-top: 10px;">获取验证码</button>
+                <button onclick="check()" class="btn btn-success" style="float:left;width: 100px; margin-left:10px;margin-top: 10px;">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<!-- Custom Js -->
+<script src="../assets/js/custom-scripts.js"></script>
+<script>
+    var stuInfo = JSON.parse(sessionStorage.getItem("stuInfo"));
+
+    var countdownHandler = function(){
+        var $button = $("#getCode");
+        var number = 60;
+        var countdown = function(){
+            if (number == 0) {
+                $button.attr("disabled",false);
+                $button.html("获取验证码");
+                number = 60;
+                return;
+            } else {
+                $button.attr("disabled",true);
+                $button.html(number + "秒 重新发送");
+                number--;
+            }
+            setTimeout(countdown,1000);
+        }
+        setTimeout(countdown,1000);
+    }
+
+    //发送短信验证码
+    function send(){
+//        alert(111);
+        var data = {};
+        data.mobile = $("#new-phone").val();
+//        alert(111);
+        if(data.mobile == ''){
+            alert('请输入手机号码');
+            return;
+        }
+        var reg = /^1\d{10}$/;
+        if(!reg.test(data.mobile)){
+            alert('请输入合法的手机号码');
+            return ;
+        }
+        $.ajax({
+            url: "/sendsms/"+stuInfo.people.stuId+"/"+data.mobile,
+            async : true,
+            type: "post",
+            dataType:"json",//返回类型值为json
+            success: function (response) {
+                if(response.success){
+                    countdownHandler();
+                    return ;
+                }
+                alert(response.message);
+            }
+        });
+    }
+
+    //提交
+    function check(){
+        if($("#mobile").text() == ''){
+            alert("请输入手机号");
+            return ;
+        }
+        if($("#code").val() == ''){
+            alert("请输入验证码");
+            return ;
+        }
+        $.ajax({
+            url: "/checkcode/"+stuInfo.people.stuId+"/"+$("#new-phone").val()+"/"+$("#code").val(),
+            async : true,
+            type: "post",
+            dataType:"json",//返回类型值为json
+            success: function (data) {
+                if(data.success == true){
+                    alert("更改手机号成功");
+                    $("#mobile").text($("#new-phone").val());
+                    $("#change-phone").css('display','none');
+                    $("#new-phone").val('');
+                    $("#code").val('');
+                    $("#getCode").attr("disabled",false);
+                    $("#getCode").html('获取验证码');
+                    return ;
+                }
+                alert(data.message);
+            }
+        });
+    }
+
+    function showChangePwd(){
+        if( $("#change-pwd").css("display") == 'none' ) {
+            $("#change-pwd").css("display", "");
+        }
+        else {
+            $("#change-pwd").css("display","none");
+        }
+    }
+    $("#new-pwd2").on('change',function () {
+ //       alert(1);
+        if( $("#new-pwd").val() != $("#new-pwd2").val()){
+            $("#label-nosame").css('display','');
+        }else{
+            $("#label-nosame").css('display','none');
+        }
+    })
+    function changePwd() {
+        var oldPwd = $("#old-pwd").val();
+        var newPwd = $("#new-pwd").val();
+        var newPwd2 = $("#new-pwd2").val();
+        if( oldPwd == '' || newPwd == '' || newPwd2 == '' ){
+            alert('不能为空！'); return;
+        }
+        if( newPwd != newPwd2 ){
+            alert('两次密码不一致！'); return;
+        }
+        if( oldPwd != JSON.parse(sessionStorage.getItem("stuInfo")).people.stuPassword ){
+            alert('原始密码错误，修改失败！'); return;
+        }
+        alert('成功！');
+        showChangePwd();
+        $("#old-pwd").val('');
+        $("#new-pwd").val('');
+        $("#new-pwd2").val('');
+    }
+
+    function showChangePhone(){
+        if( $("#change-phone").css("display") == 'none' ) {
+            $("#change-phone").css("display", "");
+        }
+        else {
+            $("#change-phone").css("display","none");
+        }
+    }
+
+</script>
+</body>
+</html>

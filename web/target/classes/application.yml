@@ -1,0 +1,39 @@
+spring:
+  profiles:
+    active: prod
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/yida?useSSL=false
+    username: root
+    password: 941012
+    validation-query: SELECT 1
+    test-on-borrow: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  http:
+    encoding.charset: UTF-8
+    encoding.enable: true
+    encoding.force: true
+  thymeleaf:
+    prefix:
+      classpath: /static/views/
+    check-template-location: true
+    suffix: .html
+    encoding: UTF-8
+    mode: HTML
+    cache: false
+  mvc:
+    static-path-pattern: /static/**
+  redis:
+    database: 4
+    host: 192.168.43.38
+    password: 941012
+    port: 6379
+    pool:
+      jedis:
+        max-idle: 8
+        min-idle: 0
+        max-active: 8
+        max-wait: -1

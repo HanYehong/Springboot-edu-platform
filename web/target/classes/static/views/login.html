@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>EP-es</title>
+	<!-- Meta-Tags -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta charset="utf-8">
+	<meta name="keywords" content="">
+	<script>
+		addEventListener("load", function () {
+			setTimeout(hideURLbar, 0);
+		}, false);
+
+		function hideURLbar() {
+			window.scrollTo(0, 1);
+		}
+	</script>
+	<!-- //Meta-Tags -->
+	<!-- Stylesheets -->
+	<link href="../css/style.css" rel='stylesheet' type='text/css' />
+	<!--// Stylesheets -->
+	<!--online fonts-->
+	<link href="http://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+	<!--//online fonts-->
+</head>
+
+<body>
+	<h1>EP-es</h1>
+	<div class="w3ls-login box">
+		<img src="../images/logo.png" alt="logo_img" />
+		<!-- form starts here -->
+		<form action="" method="post">
+			<div class="agile-field-txt">
+				<input type="text" name="username" placeholder="用户名/手机号" required="" />
+			</div>
+			<div class="agile-field-txt">
+				<input type="password" name="password" placeholder="密码" required="" id="myInput" />
+				<div class="agile_label">
+					<input id="check3" name="check3" type="checkbox" value="show password">
+					<label class="check" for="check3">记住密码</label>
+				</div>
+			</div>
+			<div class="w3ls-bot">
+				<input type="button" value="登录" id="login">
+			</div>
+		</form>
+	</div>
+	<!-- //form ends here -->
+	
+ <!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+
+<script type="text/javascript">
+$("#login").click(function () {
+    sessionStorage.clear();
+	var d = {};
+	d.username = $("input[name='username']").val();
+	d.password = $("input[name='password']").val();
+    $.ajax({
+		url: "/login/check",
+		data: JSON.stringify(d),
+		//type、contentType必填,指明传参方式
+		type: "POST",
+		contentType: "application/json;charset=utf-8",
+		success: function(response){
+			//前端调用成功后，可以处理后端传回的json格式数据。
+			alert(response.message);
+	//		alert(response.success);
+			if(response.success){
+     //           alert(0);
+				var json = JSON.stringify(response);
+				if( response.people == null){
+     //               alert(3);
+                    sessionStorage.setItem("adminInfo",1);
+                    window.location.href="admin.html";
+				}
+				if(response.people.stuId != null ){
+	//			    alert(1);
+					sessionStorage.setItem("stuInfo",json);
+					window.location.href="student.html";
+				}else if(response.people.teaId != null){
+     //               alert(2);
+					sessionStorage.setItem("teaInfo",json);
+					window.location.href="teacher.html";
+				}
+			}
+		}
+	});
+})
+</script>
+</body>
+
+</html>

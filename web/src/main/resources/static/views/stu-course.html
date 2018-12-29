@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的课程</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+</head>
+<body>
+<div id="page-wrapper" >
+    <div id="page-inner">
+        <div class="row">
+            <div class="col-md-12" id="subject-content">
+
+            </div>
+            <!-- /. PAGE INNER  -->
+        </div>
+        <!-- /. PAGE WRAPPER  -->
+    </div>
+</div>
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<!-- Custom Js -->
+<script src="../assets/js/custom-scripts.js"></script>
+<script>
+    window.onload = function(){
+        var color = new Array();
+        color[0] = 'info';
+        color[1] = 'success';
+        color[2] = 'warning';
+        color[3] = 'danger';
+        var course = (JSON.parse(sessionStorage.getItem("course"))).course;
+        var studentCourse = (JSON.parse(sessionStorage.getItem("course"))).stuANDcour;
+        var teacherName = (JSON.parse(sessionStorage.getItem("course"))).teaName;
+        console.log(course);
+        console.log(studentCourse);
+        for( var i = 0; i < course.length; i++ ){
+            var text = ' <div>\n' +
+                '                    <div>\n' +
+                '                        <span style="font-size: 24px;text-shadow: 3px 3px 3px #cccccc;color: #F0433D">'+course[i].courName+'</span>\n' +
+                '                        <span style="margin-left: 80px; color: #666666">授课老师：'+teacherName[i]+'</span>\n' +
+                '                        <span style="margin-left: 300px; color: #F0433D;">价格：'+course[i].courPrice+'元 / 节课</span>\n' +
+                '                        <span style="margin-left: 20px;color: #00bf72">续费 ></span>\n'+
+                '                    </div>\n' +
+                '                    <div>\n' +
+                '                        <div class="progress" style="width: 80%;">\n' +
+                '                            <div class="progress-bar progress-bar-'+color[i%4]+'" role="progressbar"\n' +
+                '                                 aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"\n' +
+                '                                 style="width: '+(studentCourse[i].remain/studentCourse[i].total)*100+'%;">\n' +
+                '                            </div>\n' +
+                '                        </div>\n' +
+                '                        <div style=" font-weight: bolder;"><span>剩余'+studentCourse[i].remain+'节课 / 总共'+studentCourse[i].total+'节课</span></div>\n' +
+                '                        <br><br><br><br>\n' +
+                '                    </div>\n' +
+                '                </div>'
+            $("#subject-content").append(text);
+        }
+    }
+</script>
+</body>
+</html>

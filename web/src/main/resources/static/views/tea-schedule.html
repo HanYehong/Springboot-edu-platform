@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>课表查询</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <style>
+        ::-webkit-scrollbar{
+            display:none;
+        }
+        th{
+            background: #639752;
+        }
+        td,th{
+            width: 100px;
+        }
+        .table-left{
+            font-size: 20px;
+            text-shadow: 3px 3px 3px #cccccc;
+            background: #A5BA94;
+            width: 100px;
+        }
+        .label-bottom{
+            width: 1700px;
+            text-align:center;
+            height: 40px;
+            display:table-cell;
+            vertical-align: middle;
+            background: #cccccc;
+        }
+        .label-middle{
+            width: 200px;
+            margin: 0 auto;
+            text-shadow: 3px 3px 3px #cccccc;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+<div id="page-wrapper" >
+    <div id="page-inner">
+        <div class="row">
+            <div class="col-md-12">
+                <div style="width: 100%;">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th></th>
+                            <th>星期一</th>
+                            <th>星期二</th>
+                            <th>星期三</th>
+                            <th>星期四</th>
+                            <th>星期五</th>
+                            <th>星期六</th>
+                            <th>星期天</th>
+                        </tr>
+                        <tr>
+                            <td rowspan="2" class="table-left" style="vertical-align: middle;"><strong>上午</strong></td>
+                            <td style="height: 60px;" id="cell-1-1"></td>
+                            <td id="cell-1-2"></td>
+                            <td id="cell-1-3"></td>
+                            <td id="cell-1-4"></td>
+                            <td id="cell-1-5"></td>
+                            <td id="cell-1-6"></td>
+                            <td id="cell-1-7"></td>
+                        </tr>
+                        <tr>
+                            <td style="height: 60px;" id="cell-2-1"></td>
+                            <td id="cell-2-2"></td>
+                            <td id="cell-2-3"></td>
+                            <td id="cell-2-4"></td>
+                            <td id="cell-2-5"></td>
+                            <td id="cell-2-6"></td>
+                            <td id="cell-2-7"></td>
+                        </tr>
+                    </table>
+                    <div class="label-middle"><p><strong>中午 12:30 ~ 14:00</strong></p></div>
+                    <table class="table table-bordered">
+                        <tr>
+                            <td rowspan="2" class="table-left" style="vertical-align: middle;"><strong>下午</strong></td>
+                            <td style="height: 60px;" id="cell-3-1"></td>
+                            <td id="cell-3-2"></td>
+                            <td id="cell-3-3"></td>
+                            <td id="cell-3-4"></td>
+                            <td id="cell-3-5"></td>
+                            <td id="cell-3-6"></td>
+                            <td id="cell-3-7"></td>
+                        </tr>
+                        <tr>
+                            <td style="height: 60px;" id="cell-4-1"></td>
+                            <td id="cell-4-2"></td>
+                            <td id="cell-4-3"></td>
+                            <td id="cell-4-4"></td>
+                            <td id="cell-4-5"></td>
+                            <td id="cell-4-6"></td>
+                            <td id="cell-4-7"></td>
+                        </tr>
+                    </table>
+                    <br><br>
+                    <div class="label-bottom">
+                        <span><strong>说明：上午分为 [8:00 ~ 10:00] 和 [10:30 ~ 12:30]，下午分为 [14:00 ~ 16:00] 和 [16:30 ~ 18:30]</strong></span>
+                    </div>
+                </div>
+            </div>
+            <!-- /. PAGE INNER  -->
+        </div>
+        <!-- /. PAGE WRAPPER  -->
+    </div>
+</div>
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<!-- Custom Js -->
+<script src="../assets/js/custom-scripts.js"></script>
+<script>
+    window.onload = function () {
+        var sessionObj = JSON.parse(sessionStorage.getItem("teaInfo"));
+        $.ajax({
+            url: "/course/teacourse/"+sessionObj.people.teaId,
+            //type、contentType必填,指明传参方式
+            type: "GET",
+            contentType: "application/json;charset=utf-8",
+            success: function(response){
+                //前端调用成功后，可以处理后端传回的json格式数据。
+//                alert(response.message);
+                if(response.success){
+                    console.log(response.result);
+                    for( var i = 0; i < response.result.course.length; i++ ){
+                        var temp_cour = response.result.courseTime[i];
+                        console.log(temp_cour);
+                        for( var j = 0; j < response.result.courseTime[i].length; j++) {
+                            var cell = "cell-" + temp_cour[j].courRank + "-" + temp_cour[j].courWeek;
+                            console.log(cell);
+                            $("#" + cell).html("<span style='color: #F0433D'>" + response.result.course[i].courName + "</span><span style='color: #46b8da;font-size: 10px;'>["+ response.result.course[i].courGrade +"年级]</span><br>" + temp_cour[j].courRoom);
+                        }
+                    }
+                }else{
+                    alert("查询课程失败！");
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

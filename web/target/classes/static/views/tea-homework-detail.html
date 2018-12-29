@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>查看作业</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+</head>
+<body>
+<div style="width: 100%;">
+    <textarea id="homework" class="form-control" style="width: 100%;height:200px;" onchange="showBtn()">
+      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    </textarea>
+</div>
+<div style="width: 100%;">
+    <input id="save" type="button" class="btn btn-sm btn-success" style="float: right;margin-top: 10px;display: none;" value="保存修改">
+</div>
+<div style="margin-top: 50px;">
+    <table class="table table-striped">
+        <thead>
+        <tr style="background: rgba(189,170,79,0.5);">
+            <th>序号</th>
+            <th>姓名</th>
+            <th>学号</th>
+            <th>完成情况</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+
+        <tbody id="content">
+
+        </tbody>
+    </table>
+</div>
+
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script>
+    function GetRequest() {
+        var url =decodeURI(decodeURI(location.search)); //获取url中"?"符后的字串，使用了两次decodeRUI解码
+        var theRequest = new Object();
+        if (url.indexOf("?") != -1) {
+            var str = url.substr(1);
+            strs = str.split("&");
+            for (var i = 0; i < strs.length; i++) {
+                theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+            }
+            return theRequest;
+        }
+    }
+    var params = GetRequest();
+    var courId = params.courId;
+    var hwId = params.hwId;
+
+    window.onload = function(){
+   //     alert(courId);
+   //     alert(hwId);
+        $.ajax({
+            url: "/homework/detail/"+hwId+"/"+courId,
+            type: "GET",
+            contentType: "application/json;charset=utf-8",
+            success: function(response){
+                if(response.success){
+   //                 alert("查找成功");
+                    var homework = response.result.homework;
+                    var homeworkDo = response.result.homeworkDo;
+                    var student = response.result.student;
+                    $("#homework").val(homework.hwContent);
+                    for(var i = 0; i < student.length; i++){
+                        var isComplete = '<td style="color: #4cae4c"><strong>已完成</strong></td>\n' +
+                            '            <td style="color: #00bf72">查看&nbsp;></td>';
+                        if(homeworkDo[i].createTime == null){
+                            isComplete = '<td style="color: #F0433D"><strong>未完成</strong></td>\n' +
+                                '            <td style="color: #00bf72">--</td>';
+                        }
+                        var text = '<tr>\n' +
+                            '            <td>'+(i+1)+'</td>\n' +
+                            '            <td>'+student[i].stuName+'</td>\n' +
+                            '            <td>'+student[i].stuId+'</td>\n' +
+                            isComplete +
+                            '        </tr>';
+                        $("#content").append(text);
+                    }
+                }else{
+                    alert("查找失败");
+                }
+            }
+        });
+    }
+    function showBtn() {
+        $("#save").css('display', '');
+    }
+    $("#save").on('click',function(){
+        alert($("#homework").val());
+        $("#save").css('display', 'none');
+    })
+</script>
+</body>
+</html>

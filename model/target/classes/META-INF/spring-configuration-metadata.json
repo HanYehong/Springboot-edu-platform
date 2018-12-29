@@ -1,0 +1,23 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.imooc.firstappdemo.domain.User",
+      "name": "user",
+      "type": "com.imooc.firstappdemo.domain.User"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.imooc.firstappdemo.domain.User",
+      "defaultValue": 0,
+      "name": "user.id",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.imooc.firstappdemo.domain.User",
+      "name": "user.name",
+      "type": "java.lang.String"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>付费</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+</head>
+<body>
+<div style="width: 100%;text-align: center">
+    <img src="../images/erweima.png">
+</div>
+<div style="width: 100%;text-align: center;margin-top: 50px;">
+    <span style="color: #666666;font-weight: bolder;font-size: 20px;">或点击</span>
+</div>
+<div style="width: 100%;text-align: center;margin-top: 50px;">
+    <button class="btn btn-success" style="width: 100px;" id="finish">已缴费</button>
+</div>
+
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script>
+    var choose = JSON.parse(sessionStorage.getItem('stuCourse'));
+    var name = sessionStorage.getItem('name');
+    var sex = sessionStorage.getItem('sex');
+    var phone = sessionStorage.getItem('phone');
+
+    $("#finish").on('click',function(){
+        $.ajax({
+            url: "/student/add/"+name+"/"+sex+"/"+phone,
+            //type、contentType必填,指明传参方式
+            data:JSON.stringify(choose),
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            success: function(response){
+                //前端调用成功后，可以处理后端传回的json格式数据。
+//                alert(response.message);
+                if(response.success){
+      //             alert('成功');
+                    var username = response.result.username;
+                    var password = response.result.password;
+                    window.location = 'admin-register-finish.html?username='+username+'&password='+password;
+                }else{
+                    alert("添加失败！");
+                }
+            }
+        });
+    })
+</script>
+</body>
+</html>

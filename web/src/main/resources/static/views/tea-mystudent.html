@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的学生</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <link href="../css/bootstrap-datetimepicker.min.css" />
+    <link href="../css/bootstrap-datetimepicker.css" />
+    <style>
+        .tubiao{
+            margin-top: 15px;
+            margin-right: 30px;
+            float: right;
+            cursor: pointer;
+        }
+        .myClass{
+            width: 100%;
+            background:rgba(40,114,230,0.5) ;
+            color:#FFFFFF;
+            height: 50px;
+            vertical-align: middle;
+            boder:1px solid #cccccc;
+            border-radius: 10px;
+        }
+        .className{
+            font-size: 20px;
+            font-weight: bolder;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+        .classGrade{
+            font-size: 14px;
+            font-weight: bolder;
+            margin-top: 15px;
+            margin-left: 20px;
+            color: #c7254e;
+        }
+        .show{
+            font-size: 9px;
+            margin-top: 15px;
+            margin-right: 10px;
+            cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 100%;" id="content">
+
+</div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div style="width: 100%; text-align: center;padding: 20px;">
+                <button type="button" class="btn btn-primary" style="width: 170px;" id="modal-btn1"></button>
+                <button type="button" class="btn btn-primary" style="width: 170px;margin-left: 30px;" id="modal-btn2"></button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="scoreModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div style="width: 100%;padding: 20px;">
+                <div>
+                    <span style="font-weight: bolder;width: 100px">科目名称：</span><span style="color: #4cae4c" id="modal-name"></span>
+                </div>
+                <div style="margin-top: 20px;">
+                    <span style="font-weight: bolder;width: 100px">班级编号：</span><span style="color: #4cae4c" id="modal-courId"></span>
+                </div>
+                <div style="margin-top: 20px;">
+                    <span style="font-weight: bolder;width: 100px">年级：</span><span style="color: #4cae4c" id="modal-grade"></span>
+                </div>
+                <div style="margin-top: 20px;margin-bottom: 20px;">
+                    <span style="font-weight: bolder;float: left;margin-top: 5px">试卷总分 ：</span>
+                    <input type="text" class="form-control" id="modal-total-score" style="margin-left:10px;float: left;width: 70px;" value="100">
+                    <span style="font-weight: bolder;margin-left:20px;float: left;margin-top: 5px">考试日期 ：</span>
+                    <div class='input-group date' id='datetimepicker' style="float: left;width: 150px;">
+                        <input type='text' id="modal-date" class="form-control" />
+                        <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div><br><br>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" id="create-score-btn">创建成绩</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script src="../js/echarts.js"></script>
+<script src="../js/bootstrap-datetimepicker.min.js"></script>
+<script src="../js/bootstrap-datetimepicker.js"></script>
+<script src="../js/my.js"></script>
+<script>
+    var allClass = {};
+    window.onload = function () {
+        var sessionObj = JSON.parse(sessionStorage.getItem("teaInfo"));
+        $.ajax({
+            url: "/course/teacourse/"+sessionObj.people.teaId,
+            //type、contentType必填,指明传参方式
+            type: "GET",
+            contentType: "application/json;charset=utf-8",
+            success: function(response){
+                //前端调用成功后，可以处理后端传回的json格式数据。
+//                alert(response.message);
+                if(response.success){
+                    console.log(response.result);
+                    for( var i = 0; i < response.result.course.length; i++ ){
+                        var temp_cour = response.result.course[i];
+                        allClass[temp_cour.courId] = temp_cour;
+                        console.log(temp_cour);
+                        var text = '<div id=cour-"'+temp_cour.courId+'">' +
+                            ' <div id="'+temp_cour.courId+'" class="myClass">\n' +
+                            '        <span style="float: left;" class="className">['+temp_cour.courId+']'+temp_cour.courName+'班</span>\n' +
+                            '        <span style="float: left;" class="classGrade">'+temp_cour.courGrade+'年级</span>\n' +
+                            '        <span onclick="showStu(this)" style="float: right;" class="show">展开 >></span>\n' +
+                            '        <span class="glyphicon glyphicon-edit tubiao" title="作业系统" onclick="showModal(this,\'查看作业\',\'布置作业\')"></span>\n' +
+                            '        <span class="glyphicon glyphicon-file tubiao" title="成绩系统" onclick="showModal(this,\'查看成绩\',\'录入成绩\')"></span>\n' +
+                            '</div>'+
+                            '<table class="table table-bordered" style="margin-bottom:20px;display:none;margin: 0 auto;" id="table-'+temp_cour.courId+'">\n' +
+                            '        <thead>\n' +
+                            '        <tr style="background: rgba(240,215,127,0.5);">\n' +
+                            '            <th>序号</th>\n' +
+                            '            <th>姓名</th>\n' +
+                            '            <th>学号</th>\n' +
+                            '            <th>性别</th>\n' +
+                            '            <th>联系方式</th>\n' +
+                            '            <th>平均分</th>\n' +
+                            '            <th>最高分</th>\n' +
+                            '            <th>最近分数</th>\n' +
+                            '        </tr>\n' +
+                            '        </thead>\n' +
+                            '        <tbody style="background: #ffffff;" id="tbody-'+temp_cour.courId+'">\n' +
+                            '        </tbody>\n' +
+                            '</table>' +
+                            '</div><br>'
+                        $("#content").append(text);
+                        $.ajax({
+                            url: "/course/student/"+temp_cour.courId,
+                            //type、contentType必填,指明传参方式
+                            type: "GET",
+                            async:false,
+                            dataType:"json",//返回类型值为json
+                            success: function(response){
+                                //前端调用成功后，可以处理后端传回的json格式数据。
+//                alert(response.message);
+                                if(response.success){
+          //          alert(response.success);
+                                    var xuhao = 1;
+                                    console.log(response.result.classStu);
+                                    for( var i = 0; i < response.result.classStu.length; i++ ){
+                                        var stu = response.result.classStu[i];
+                                        var score = response.result.score[i];
+                                        console.log("i=="+i);
+                                        console.log(stu);
+                                        var sex = '男';
+                                        if(stu.stuSex == 0){
+                                            sex = '女';
+                                        }
+                                        var text = '<tr>\n' +
+                                            '            <td>'+xuhao+'</td>\n' +
+                                            '            <td>'+stu.stuName+'</td>\n' +
+                                            '            <td>'+stu.stuId+'</td>\n' +
+                                            '            <td>'+sex+'</td>\n' +
+                                            '            <td>'+stu.stuPhone+'</td>\n' +
+                                            '            <td style="color: #F0433D;font-weight: bolder">'+score.avg+'</td>\n' +
+                                            '            <td style="color: #46b8da;font-weight: bolder">'+score.max+'</td>\n' +
+                                            '            <td style="color: #00bf72;font-weight: bolder">'+score.res+'</td>\n' +
+                                            '        </tr>';
+                                        var body = "#tbody-"+temp_cour.courId;
+             //                           alert("body==="+body);
+                                        $(body).append(text);
+                                        xuhao++;
+                                    }
+
+                                }else{
+                                    alert("查询失败！");
+                                }
+                            }
+                        });
+                    }
+
+
+                }else{
+                    alert("查询课程失败！");
+                }
+            }
+        });
+    }
+
+    function showStu(obj){
+        var id = $(obj).parent().attr('id');
+        var tableId = "#table-"+id;
+  //      alert(tableId);
+        if($(tableId).css("display")=='none')
+            $(tableId).css("display","");
+        else
+            $(tableId).css("display","none");
+    }
+
+    var cla;
+    function showModal(obj,text1,text2) {
+        $("#myModal").modal('show');
+        cla = obj;
+        $("#modal-btn1").text(text1);
+        $("#modal-btn2").text(text2);
+
+        $("#modal-btn1").on('click',function(){
+            if( $("#modal-btn1").text() == '查看成绩' ){
+                window.location = 'tea-score.html?classId='+$(cla).parent().attr('id');
+            }else{
+                window.location = 'tea-homework.html';
+            }
+        })
+
+        $("#modal-btn2").on('click',function(){
+ //           alert(1);
+//            alert($("#modal-btn2").text() );
+            if( $("#modal-btn2").text() == '录入成绩' ){
+                var modal_class = allClass[$(cla).parent().attr('id')];
+                $("#scoreModal").modal('show');
+                $("#modal-courId").text(modal_class.courId);
+                $("#modal-name").text(modal_class.courName);
+                $("#modal-grade").text(modal_class.courGrade+'年级');
+
+                $("#create-score-btn").on('click',function(){
+                    var data_id = $("#modal-courId").text();
+                    var data_total_score = $("#modal-total-score").val();
+                    var data_date = $("#modal-date").val();
+                    var data_name = $("#modal-name").text();
+                    var scoreMain = {};
+                    scoreMain.courId = data_id;
+                    scoreMain.totalScore = data_total_score;
+                    scoreMain.scoDate = data_date;
+                    alert(1);
+                    $.ajax({
+                        url: "/score/addmain/",
+                        //type、contentType必填,指明传参方式
+                        data:JSON.stringify(scoreMain),
+                        type: "POST",
+                        contentType: "application/json;charset=utf-8",
+                        success: function(response){
+                            //前端调用成功后，可以处理后端传回的json格式数据。
+                            alert(response.success);
+                            if(response.success){
+                                var res_id = response.result.id;
+                                var last_id = response.result.lastId;
+                                window.location =
+                                    'tea-score-input.html?mainId='+res_id+'&courId='+data_id+'&courName='+data_name+'&lastMainId='+last_id;
+                            }else{
+                                alert("添加失败！");
+                            }
+                        }
+                    });
+                })
+            }else{
+                window.location = 'tea-homework-input.html'
+            }
+        })
+    }
+
+    $('#datetimepicker').datetimepicker({
+        format:'yyyy-mm-dd',  //格式  如果只有yyyy-mm-dd那就是0000-00-00
+        autoclose:true,//选择后是否自动关闭
+        minView: "month"
+    })
+</script>
+</body>
+</html>

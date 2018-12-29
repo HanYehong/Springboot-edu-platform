@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>在线自测</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Custom Styles-->
+    <link href="../assets/css/custom-styles.css" rel="stylesheet" />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <style>
+        .choose:hover{
+            background: #e7c3c3;
+            font-weight: bolder;
+            cursor: pointer;
+        }
+        .choose{
+            border-radius: 10px;width: 100%;height: 80%;
+        }
+        tr{
+            height: 50px;
+        }
+        .change{
+            word-break:break-all; width:100%;
+        }
+        .ABCD{
+            font-size: 18px;font-weight: bolder;color: #00bf72;margin-left: 30px;
+        }
+        td{
+            height:50px;
+            align:center;
+            valign:middle;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 100%;">
+    <div style="width: 100%">
+        <div style="border: #3c3c3c 1px solid; width:100%; border-radius: 10px;padding: 5px;">
+            <div class="change" style="min-height:100px;background: #8A8A8A;color: #FFFFFF;padding: 5px;font-weight: bolder;border-radius: 10px;">
+               <p id="question">
+
+               </p>
+            </div>
+        </div>
+        <div style="margin-top: 20px;width: 100%;">
+            <table style="border: 0px;width: 800px;">
+                <tr>
+                    <td style="text-align: left;" id="1" onclick="check(this)">
+                        <div class="choose">
+                            <span class="ABCD">A.</span>&nbsp;&nbsp;
+                            <span style="color: #5e5e5e" id="ans-1">
+
+                            </span>
+                            <span class="" id="check-1" style="margin-left: 200px;font-size: 20px;"></span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;" id="2" onclick="check(this)">
+                        <div class="choose">
+                            <span class="ABCD">B.</span>&nbsp;&nbsp;
+                            <span style="color: #5e5e5e" id="ans-2">
+
+                            </span>
+                            <span class="" id="check-2" style="margin-left: 200px;font-size: 20px;"></span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;" id="3" onclick="check(this)">
+                        <div class="choose">
+                            <span class="ABCD">C.</span>&nbsp;&nbsp;
+                            <span style="color: #5e5e5e" id="ans-3">
+
+                            </span>
+                            <span class="" id="check-3" style="margin-left: 200px;font-size: 20px;"></span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;" id="4" onclick="check(this)">
+                        <div class="choose">
+                            <span class="ABCD">D.</span>&nbsp;&nbsp;
+                            <span style="color: #5e5e5e" id="ans-4">
+
+                            </span>
+                            <span class="" id="check-4" style="margin-left: 200px;font-size: 20px;"></span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="show-analyze" style="display:none;margin-top: 10px;width: 800px;">
+            <span style="color: #00bf72;cursor: pointer;" onclick="showAnalyze()">解析 ></span>
+            <div id="analyze" style="min-height:100px;display: none;padding:10px;background: rgba(47,144,183,0.3);border-radius: 10px;">
+                <span id="analyze-content" style="font-style: italic;color: orangered;">这是好大一段解析</span>
+            </div>
+        </div>
+        <div style="margin-top: 20px;width: 100px;">
+            <button class="btn btn-info" id="next" onclick="clearChoose()" style="width:100%;display: none;font-weight: bolder">下一题</button>
+        </div>
+    </div>
+</div>
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script>
+    var quesId = [];  //存储题目id，也是实现不同题目概率的关键，例如 [1,1,1,2,3]
+    var question = {};  //所有题目
+    var total = 0;
+    var map = {};   //题目id与id个数的对应关系
+    var next;
+    $.ajax({
+        type:"get",
+        url:"/test/practice/findAll/"+JSON.parse(sessionStorage.getItem('stuInfo')).people.stuId+"/"+sessionStorage.getItem('courName')+"/"+sessionStorage.getItem('courGrade'),
+        dataType:"json",//返回类型值为json
+        success: function(response){
+            //前端调用成功后，可以处理后端传回的json格式数据。
+//            alert(response.message);
+            if(response.success) {
+  //              alert("搜索题目成功");
+                console.log(response.result.question);
+                console.log(response.result.practice);
+                var len = response.result.question.length;
+                console.log("len===="+len);
+                for( var i = 0; i < len ; i++ ){
+                    var t = response.result.question[i];
+                    console.log(i);
+                    console.log('t===');
+                    console.log(t);
+                    question[t.id] = t;
+                    map[t.id] = 1;
+                    quesId.push(t.id);
+                    total++;
+                }
+                var len_pra = response.result.practice.length;
+                for( var j = 0; j < len_pra; j++ ){
+                    var pra = response.result.practice[j];
+                    for( var k = 0; k < pra.faultCount; k++ ){
+                        quesId.push(pra.quesId);
+                        total++;
+                    }
+                    map[pra.quesId] = pra.faultCount + 1;
+                }
+                console.log('==========question=====');
+                console.log(question);
+                console.log('=========qesId=======');
+                console.log(quesId);
+                console.log('============map===========');
+                console.log(map);
+                next = randNum(0,total);
+                showQuestion();
+            }else{
+                alert("搜索题目失败！")
+            }
+        },
+        error:function(){//需要处理的部分
+            alert("搜索题目失败")
+        }
+    })
+
+    function showQuestion() {
+        var quesInfo = question[quesId[next]];
+        $('#question').text(quesInfo.question);
+        $('#ans-1').text(quesInfo.ans1);
+        $('#ans-2').text(quesInfo.ans2);
+        $('#ans-3').text(quesInfo.ans3);
+        $('#ans-4').text(quesInfo.ans4);
+        $('#analyze-content').text(quesInfo.ansAnalyze);
+    }
+
+    function check(obj){
+        $("#show-analyze").css('display','');
+        var id = $(obj).attr('id');
+  //      alert('id='+id);
+        var ques_id = quesId[next];
+  //      alert('qued_id='+ques_id);
+        var choose_ans = parseInt(id);
+   //     alert('choose_ans='+choose_ans);
+        var question_temp = question[ques_id];
+        if(question_temp.trueAns == choose_ans){
+ //           alert('remove');
+            var ans = "#check-"+choose_ans;
+            $(ans).attr('class','glyphicon glyphicon-ok');
+            $(ans).css('color','#4cae4c');
+            removeId(ques_id);
+        }else{
+ //           alert('add');
+            var ans = "#check-"+choose_ans;
+            $(ans).attr('class','glyphicon glyphicon-remove');
+            $(ans).css('color','#F0433D');
+            var true_ans = "#check-"+question_temp.trueAns;
+            $(true_ans).attr('class','glyphicon glyphicon-ok');
+            $(true_ans).css('color','#4cae4c');
+            addId(ques_id);
+        }
+        console.log(map);
+        next = randNum(0,total);
+        console.log(quesId);
+ //       alert('next===='+next);
+        $("#next").css('display','');
+    }
+
+    function clearChoose(){
+        $('#check-1').attr('class','');
+        $('#check-1').css('color','');
+        $('#check-2').attr('class','');
+        $('#check-2').css('color','');
+        $('#check-3').attr('class','');
+        $('#check-3').css('color','');
+        $('#check-4').attr('class','');
+        $('#check-4').css('color','');
+        $("#show-analyze").css('display','none');
+        $("#analyze").css("display",'none');
+        $('#next').css('display','none');
+        showQuestion();
+    }
+
+    function addId(id){
+        quesId.push(id);
+        map[id] = map[id] + 1;
+        total++;
+        $.ajax({
+            type:"post",
+            url:"/test/practice/add/"+JSON.parse(sessionStorage.getItem('stuInfo')).people.stuId+"/"+id,
+            dataType:"json",//返回类型值为json
+            success: function(response){
+                //前端调用成功后，可以处理后端传回的json格式数据。
+//            alert(response.message);
+                if(response.success) {
+      //              alert("增加成功");
+
+                }else{
+                    alert("增加失败！")
+                }
+            },
+            error:function(){//需要处理的部分
+                alert("增加失败")
+            }
+        })
+
+    }
+
+    function removeId(id){
+        if( map[id] > 1 ){
+            var find = findIndex(id);
+            if( find != -1 ){
+                quesId.splice(find,1);
+                map[id] = map[id] - 1;
+                total--;
+            }
+        }
+        $.ajax({
+            type:"post",
+            url:"/test/practice/remove/"+JSON.parse(sessionStorage.getItem('stuInfo')).people.stuId+"/"+id,
+            dataType:"json",//返回类型值为json
+            success: function(response){
+                //前端调用成功后，可以处理后端传回的json格式数据。
+//            alert(response.message);
+                if(response.success) {
+          //          alert("删除成功");
+
+                }else{
+                    alert("删除失败！")
+                }
+            },
+            error:function(){//需要处理的部分
+                alert("删除失败")
+            }
+        })
+    }
+
+    function findIndex(num){
+        var l = quesId.length;
+        for( var i = 0; i < l; i++ ){
+            if( quesId[i] == num ){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    function randNum(minnum , maxnum){
+        return Math.floor(minnum + Math.random() * (maxnum - minnum));
+    }
+
+    function showAnalyze(){
+        if($("#analyze").css('display') == 'none'){
+            $("#analyze").css('display','');
+        }else{
+            $("#analyze").css('display','none');
+        }
+    }
+</script>
+</body>
+</html>

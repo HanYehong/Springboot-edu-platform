@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>选择练习的科目</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <style>
+        .subject{
+            margin:20px 0 0 20px;border-radius: 10px;border: #666666 1px solid;height: 50px;width: 120px;
+            background: #c4e3f3;
+        }
+        .subject-name{
+            font-weight: bolder;font-size: 18px;margin-left: 5px;margin-top: 5px;
+        }
+        .subject-grade{
+            color: #F0433D;margin-left: 5px;margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 100%;text-align: center;">
+    <h1 style="color: #666666;font-weight: bolder;font-size: 20px;">请选择你要练习的课程</h1>
+    <div style="word-break:break-all; width:100%;margin-top: 50px; border: #8A8A8A 2px solid; border-radius: 10px; height: 300px;">
+        <div id="content">
+
+        </div>
+        <div style="margin-top: 235px;">
+            <input type="button" id="begin" class="btn btn-warning" style="width: 100px; font-weight: bolder" value="开始练习">
+        </div>
+    </div>
+</div>
+
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script>
+    var course = JSON.parse(sessionStorage.getItem('course'));
+    window.onload = function(){
+        for( var i = 0; i < course.course.length; i++ ){
+            var text = '<div class="subject" style="float: left">\n' +
+                '                <span class="subject-name">'+course.course[i].courName+'</span>\n' +
+                '                <span class="subject-grade">'+course.course[i].courGrade+'年级</span><br>\n' +
+                '                <input type="checkbox" id="'+course.course[i].courId+'" style="float: right;margin-right: 5px;">\n' +
+                '            </div>'
+            $("#content").append(text);
+        }
+
+    }
+
+    $("#begin").on('click',function(){
+        var courName = [];
+        var courGrade = [];
+        for( var i = 0; i < course.course.length; i++ ){
+            var id = '#'+course.course[i].courId;
+            if($(id).is(':checked')) {
+  //              alert(id);
+                courName.push(course.course[i].courName);
+                courGrade.push(course.course[i].courGrade);
+            }
+        }
+        sessionStorage.setItem('courName',courName.join('-'));
+        sessionStorage.setItem('courGrade',courGrade.join('-'));
+ //       alert(courName.join('-'));
+ //       alert(courGrade.join('-'));
+        window.location = 'stu-test.html';
+    })
+</script>
+</body>
+</html>

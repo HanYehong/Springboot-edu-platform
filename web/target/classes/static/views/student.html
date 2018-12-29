@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>学生平台</title>
+	<!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+     <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+        <!-- Custom Styles-->
+    <link href="../assets/css/custom-styles.css" rel="stylesheet" />
+     <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <style>
+        ::-webkit-scrollbar{
+            display:none;
+        }
+    </style>
+</head>
+<body>
+    <div id="wrapper">
+        <nav class="navbar navbar-default top-navbar" role="navigation">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="stu-info.html" target="main-show"><i class="fa fa-user"></i> <strong id="name"> Name</strong></a>
+            </div>
+
+            <ul class="nav navbar-top-links navbar-right" style="margin-right: 20px;">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
+                        <i class="fa fa-tasks fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul id="my-course" class="dropdown-menu dropdown-tasks">
+
+                    </ul>
+                    <!-- /.dropdown-tasks -->
+                </li>
+                <!-- /.dropdown -->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
+                        <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="stu-info.html" target="main-show"><i class="fa fa-user fa-fw"></i> 用户信息</a>
+                        </li>
+                        <li><a href="stu-setting.html" target="main-show"><i class="fa fa-gear fa-fw"></i> 设置</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="javascript:void(0)" onclick="logout()"><i class="fa fa-sign-out fa-fw"></i> 退出登录</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+        </nav>
+        <!--/. NAV TOP  -->
+        <nav class="navbar-default navbar-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav" id="main-menu">
+
+                    <li>
+                        <a href="javascript:void(0)" onclick="change('stu-schedule.html')"><i class="fa fa-dashboard"></i> 课表查询</a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" onclick="change('stu-score.html')" target="main-show"><i class="fa fa-desktop"></i> 成绩分析</a>
+                    </li>
+					<li>
+                        <a href="javascript:void(0)" onclick="change('stu-course.html')" target="main-show"><i class="fa fa-bar-chart-o"></i> 我的课程</a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" onclick="change('stu-homework.html')" target="main-show"><i class="fa fa-qrcode"></i> 作业系统</a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)"><i class="fa fa-sitemap"></i> 在线自测<span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level">
+                            <li>
+                                <a href="javascript:void(0)" onclick="change('stu-test-choose.html')" target="main-show">专项练习</a>
+                            </li>
+                             <li>
+                                <a href="javascript:void(0)" onclick="change('stu-test-analyze.html')" target="main-show">我的评估</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+
+        </nav>
+        <!-- /. NAV SIDE  -->
+        <div id="page-wrapper" >
+            <div id="page-inner">
+                <div class="col-md-12">
+                    <iframe id="my-iframe" src="stu-info.html" style="width: 100%;height: 600px;border: 0px;"name="main-show"></iframe>
+                </div>
+            <!-- /. PAGE WRAPPER  -->
+            </div>
+        </div>
+    </div>
+     <!-- /. WRAPPER  -->
+    <!-- JS Scripts-->
+    <!-- jQuery Js -->
+    <script src="../assets/js/jquery-1.10.2.js"></script>
+      <!-- Bootstrap Js -->
+    <script src="../assets/js/bootstrap.min.js"></script>
+    <!-- Metis Menu Js -->
+    <script src="../assets/js/jquery.metisMenu.js"></script>
+      <!-- Custom Js -->
+    <script src="../assets/js/custom-scripts.js"></script>
+    <script>
+        var color = [];
+        color[0] = 'info';
+        color[1] = 'success';
+        color[2] = 'warning';
+        color[3] = 'danger';
+        var colorIndex = 0;
+        window.onload = function(){
+ //           alert(1);
+            if(sessionStorage.getItem("stuInfo") == null){
+                alert('请先登录！');
+                parent.location.href="login.html";
+            }
+            $("#name").text(JSON.parse(sessionStorage.getItem("stuInfo")).people.stuName);
+            $.ajax({
+                url: "/course/stucourse/"+JSON.parse(sessionStorage.getItem("stuInfo")).people.stuId,
+                type: "GET",
+                contentType: "application/json;charset=utf-8",
+                success: function(response){
+                    if(response.success){
+                   //     alert("成功！");
+                        console.log(response.result.courseName);
+                        for(var i = 0; i < response.result.course.length; i++){
+                            var courseObj = response.result.stuANDcour[i];
+                            var courseObjName = response.result.courseName[i];
+                            var complete = parseInt(courseObj.remain)/parseInt(courseObj.total) * 100;
+                            var text = '<li>\n' +
+                                '                            <a href="javascript:void(0)">\n' +
+                                '                                <div>\n' +
+                                '                                    <p>\n' +
+                                '                                        <strong>'+courseObjName+'</strong>\n' +
+                                '                                        <span class="pull-right text-muted">'+complete+'%</span>\n' +
+                                '                                    </p>\n' +
+                                '                                    <div class="progress progress-striped active">\n' +
+                                '                                        <div class="progress-bar progress-bar-'+color[colorIndex++]+'" role="progressbar" aria-valuenow="'+complete+'" aria-valuemin="0" aria-valuemax="100" style="width: '+complete+'%">\n' +
+                                '                                            <span class="sr-only">'+complete+'%</span>\n' +
+                                '                                        </div>\n' +
+                                '                                    </div>\n' +
+                                '                                </div>\n' +
+                                '                            </a>\n' +
+                                '                        </li>'+
+                                '      <li class="divider"></li>';
+                            $("#my-course").append(text);
+                            if(colorIndex >= 4){
+                                colorIndex = colorIndex%4;
+                            }
+                        }
+                        var lastText = '<li>\n' +
+                            '                            <a class="text-center" href="javascript:void(0)" onclick="change(\'stu-course.html\')">\n' +
+                            '                                <strong>详细</strong>\n' +
+                            '                                <i class="fa fa-angle-right"></i>\n' +
+                            '                            </a>\n' +
+                            '                        </li>';
+                        $("#my-course").append(lastText);
+                    }else{
+                        alert("失败");
+                    }
+                }
+            });
+        }
+
+        function logout(){
+            $.ajax({
+                url: "/logout",
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                success: function(response){
+                    if(response.success){
+                        alert("成功退出！");
+                        sessionStorage.removeItem("stuInfo");
+                        window.location.href="login.html";
+                    }else{
+                        alert("退出失败");
+                    }
+                }
+            });
+        }
+
+        function change(page){
+            $("#my-iframe").attr("src",page);
+        }
+    </script>
+   
+</body>
+</html>

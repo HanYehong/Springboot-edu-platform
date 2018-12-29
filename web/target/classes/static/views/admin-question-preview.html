@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>预览题目</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <style>
+        .subject{
+            margin-top:40px;width: 100%;font-weight: bolder;
+        }
+        .subject-name{
+            color: #00bf72;font-size: 20px;
+        }
+        .subject-grade{
+            color: #F0433D;margin-left:20px;font-size: 15px;
+        }
+        .question-num{
+            color: #00bf72;font-weight: bolder;
+        }
+        .question{
+            margin-left: 10px;
+        }
+        .analyze{
+            color: #8a6d3b;font-weight: bolder
+        }
+    </style>
+</head>
+<body>
+<div style="width: 100%" id="content">
+<button class="btn btn-success" style="width: 100px;position: fixed;margin-left: 850px;" onclick="saveQuestion()">提交</button>
+</div>
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script>
+    var subjectAndGrade = [];
+    var allQues = new Array();
+    var subjectId = [];
+    var id = 1;
+    window.onload = function(){
+        allQues = JSON.parse(sessionStorage.getItem('question'));
+        console.log(allQues);
+        var len = allQues.length;
+        for( var i = 0; i < len; i++ ){
+            var l = subjectAndGrade.length;
+            var r = 0;
+            for( var j = 0; j < l; j++ ){
+                if( subjectAndGrade[j].sub == allQues[i].subject && subjectAndGrade[j].grade == allQues[i].grade){
+                    r = 1;
+                    break;
+                }
+            }
+            if( r == 0 ){
+                var subject = {sub:allQues[i].subject, grade:allQues[i].grade};
+                subjectAndGrade.push(subject);
+                subjectId.push(id);
+                var text = ' <div id="'+id+'">' +
+                    '<div class="subject">\n' +
+                    '        <span class="subject-name">'+subject.sub+'</span>\n' +
+                    '        <span class="subject-grade">'+subject.grade+'年级</span>\n' +
+                    '        <hr style="background-color:#CFCECE;height:1px;border:none;">\n' +
+                    '    </div></div>'
+                console.log('div'+id);
+                console.log(subject);
+                $("#content").append(text);
+                id++;
+            }
+        }
+
+        for( var i = 0; i < subjectAndGrade.length; i++ ){
+            var xuhao = 1;
+            for( var j = 0; j < allQues.length; j++ ){
+                if( allQues[j].subject == subjectAndGrade[i].sub && allQues[j].grade == subjectAndGrade[i].grade){
+                    console.log(allQues[j]);
+                    var text = '<div style="margin-top: 20px;">\n' +
+                        '            <div>\n' +
+                        '                <div style="float: left" class="question-num">'+(xuhao++)+'.</div>\n' +
+                        '                <div style="float: left;">'+allQues[j].question+'</div>\n' +
+                        '            </div><br>\n' +
+                        '            <div style="margin-left: 10px;">\n' +
+                        '                <div style="margin-top: 10px;">\n' +
+                        '                    <input type="radio" style="float: left" name="'+j+'">\n' +
+                        '                    <span style="float: left;" class="question">'+allQues[j].ans1+'</span>\n' +
+                        '                </div><br>\n' +
+                        '                <div style="margin-top: 10px;">\n' +
+                        '                    <input type="radio" style="float: left" name="'+j+'">\n' +
+                        '                    <span style="float: left;" class="question">'+allQues[j].ans2+'</span>\n' +
+                        '                </div><br>\n' +
+                        '                <div style="margin-top: 10px;">\n' +
+                        '                    <input type="radio" style="float: left" name="'+j+'">\n' +
+                        '                    <span style="float: left;"class="question">'+allQues[j].ans3+'</span>\n' +
+                        '                </div><br>\n' +
+                        '                <div style="margin-top: 10px;">\n' +
+                        '                    <input type="radio" style="float: left" name="'+j+'">\n' +
+                        '                    <span style="float: left;" class="question">'+allQues[j].ans4+'</span>\n' +
+                        '                </div><br>\n' +
+                        '                <div style="margin-top: 10px;">\n' +
+                        '                    <span style="float: left;" class="analyze">解析：</span>\n' +
+                        '                    <span style="float: left;">'+allQues[j].ansAnalyze+'</span>\n' +
+                        '                </div><br>\n' +
+                        '            </div>\n' +
+                        '        </div>'
+                    var div_id = '#'+subjectId[i];
+                    $(div_id).append(text);
+                }
+            }
+
+        }
+    }
+
+    function saveQuestion(){
+        $.ajax({
+            type:"get",
+            url:"/saveques",
+            data:{"question":JSON.stringify(allQues)},
+            dataType:"json",//返回类型值为json
+            success: function(response){
+                //前端调用成功后，可以处理后端传回的json格式数据。
+//            alert(response.message);
+                if(response.success) {
+                    alert("上传题目成功！")
+                    window.location = 'admin-question.html';
+                }else{
+                    alert("保存题目失败！")
+                }
+            },
+            error:function(){//需要处理的部分
+                alert("保存题目失败！")
+            }
+        })
+    }
+</script>
+</body>
+</html>

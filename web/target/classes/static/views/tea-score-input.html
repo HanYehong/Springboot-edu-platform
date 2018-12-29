@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>成绩录入</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+</head>
+<body>
+<div style="width: 100%;">
+    <table class="table table-striped">
+        <thead>
+        <tr style="background: rgba(40,147,147,0.5);">
+            <th>序号</th>
+            <th>姓名</th>
+            <th>学号</th>
+            <th>分数</th>
+        </tr>
+        </thead>
+
+        <tbody id="content">
+
+        </tbody>
+    </table>
+    <div>
+        <input class="btn btn-success" type="button" style="width: 100px;" value="完成" onclick="finishScore()">
+    </div>
+</div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="sureModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width: 400px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div style="width: 100%;padding: 20px;">
+               <span style="font-weight: bolder;">成绩已经全部录入完毕，是否立即返回？</span>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" id="undo-btn">再看看</button>
+                <button class="btn btn-success" id="do-btn">确认</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script>
+    function GetRequest() {
+        var url =decodeURI(decodeURI(location.search)); //获取url中"?"符后的字串，使用了两次decodeRUI解码
+        var theRequest = new Object();
+        if (url.indexOf("?") != -1) {
+            var str = url.substr(1);
+            strs = str.split("&");
+            for (var i = 0; i < strs.length; i++) {
+                theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+            }
+            return theRequest;
+        }
+    }
+    var param = GetRequest();
+//    alert(param.courName);
+    var mainId = param.mainId;
+    var courId = param.courId;
+    var courName = param.courName;
+    var lastMainId = param.lastMainId;
+    var count = 0;
+    var inputCount = 0;
+
+    window.onload = function(){
+        $.ajax({
+            type: "get",
+            url: "/student/findall/"+courId,
+            dataType: "json",//返回类型值为json
+            success: function (response) {
+                if(response.success){
+                    var student = response.result.stu;
+                    console.log(student);
+                    for(var i = 0; i < student.length; i++){
+                        var text = '<tr>\n' +
+                            '            <td>'+(i+1)+'</td>\n' +
+                            '            <td>'+student[i].stuName+'</td>\n' +
+                            '            <td>'+student[i].stuId+'</td>\n' +
+                            '            <td style="color: #1CC09F; font-weight: bolder">\n' +
+                            '                <input class="form-control" style="width: 70px; margin: 0 auto" onchange="finishInput(this)">\n' +
+                            '            </td>\n' +
+                            '        </tr>'
+                        $("#content").append(text);
+                        count++;
+                    }
+                    console.log('count=========='+count);
+                }
+            },
+            error: function () {//需要处理的部分
+
+            }
+        })
+    }
+
+    function finishInput(obj) {
+//        alert(1);
+        var text = $(obj).val();
+        var parent = $(obj).parent().parent();
+        var stuId = $(parent).children().eq(2).text();
+        inputCount++;
+        $(obj).parent().html('<span><strong>'+text+'</strong></span>')
+        var score = {};
+        score.stuId = parseInt(stuId);
+        score.courId = parseInt(courId);
+        score.courName = courName;
+        score.scoreMainId = parseInt(mainId);
+        score.score = parseFloat(text);
+        $.ajax({
+            url: "/score/add/"+lastMainId,
+            //type、contentType必填,指明传参方式
+            data:JSON.stringify(score),
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            success: function(response){
+                if(response.success){
+ //                   alert(inputCount);
+ //                   alert(count);
+                    if(inputCount == count){
+              //          alert('equal')
+                        $("#sureModal").modal('show');
+                    }
+                }else{
+                    alert("添加失败！");
+                }
+            }
+        });
+    }
+
+    $("#do-btn").on('click',function(){
+        finishScore();
+    })
+
+    function finishScore(){
+        window.location = 'tea-mystudent.html';
+    }
+</script>
+</body>
+</html>

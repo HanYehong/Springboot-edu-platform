@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>题库管理</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Custom Styles-->
+    <link href="../assets/css/custom-styles.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+</head>
+<body>
+<div style="width: 100%">
+    <div style="margin-left: 150px;">
+        <div>
+            <span style="color: #666666;font-weight: bolder;font-size: 24px;">请选择Excel文件进行上传：</span>
+        </div>
+        <div style="margin-top: 20px;">
+            <span style="color: #3c3c3c;font-weight: bolder">Excel表格对应的格式为：</span>
+            <span style="color: #00bf72;font-weight: bolder">
+                科目，年级，题目，选项1，选项2，选项3，选项4，正确答案，是否多选，解析
+            </span>
+            <br><br>
+            <span style="color: #F0433D;font-weight: bolder;margin-top: 10px;">示例如下：</span>
+            <br>
+            <img src="../images/excel.png" style="margin-top: 10px;">
+        </div>
+        <input id="lefile" type="file" style="display:none" >
+        <div class="input-append;" style="margin-top: 50px;">
+            <input id="show-file" type="text" style="height:28px;width:500px;" placeholder="上传附件（.xls,.xlsx格式）"  readOnly>
+            <a type="button" class="btn btn-default btn-sm" onclick="$('input[id=lefile]').click();" id="fileBtn">浏览</a>
+        </div>
+        <div style="margin-top: 80px;">
+            <button class="btn btn-success" style="width: 100px;" id="next">下一步</button>
+        </div>
+    </div>
+</div>
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<!-- Excel -->
+<script src="../js/xlsx.full.min.js"></script>
+<script src="../js/xlsx.core.min.js"></script>
+<script>
+    var wb;                                     //读取Excel的数据
+    var rABS = false;                      //是否将文件读取为二进制字符串
+    var excelTab;                         //Excel
+    var allQues = new Array();
+    $("#lefile").on('change',function(){
+        var file = $('#lefile').get(0);  //得到文件对象
+        var filename = $("#lefile").val();
+        $("#show-file").val(filename);
+        var idx = filename.lastIndexOf(".");
+        if (idx != -1){
+            ext = filename.substr(idx+1).toUpperCase();
+            ext = ext.toLowerCase( );
+            if (ext != 'xls' && ext != 'xlsx' ){
+                alert("只能上传.xls和.xlsx类型的文件!");
+                return;
+            }else{
+                importf(file);     //进行读取操作
+            }
+        } else {
+            alert("只能上传.xls和.xlsx类型的文件!");
+            return;
+        }
+    })
+
+
+    /*
+    FileReader共有4种读取方法：
+    1.readAsArrayBuffer(file)：将文件读取为ArrayBuffer。
+    2.readAsBinaryString(file)：将文件读取为二进制字符串
+    3.readAsDataURL(file)：将文件读取为Data URL
+    4.readAsText(file, [encoding])：将文件读取为文本，encoding缺省值为'UTF-8'
+    */
+
+    function importf(obj) {
+
+        if(!obj.files) {
+            return;
+        }
+        var f = obj.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var data = e.target.result;
+            if(rABS) {
+                wb = XLSX.read(btoa(fixdata(data)), {//手动转化
+                    type: 'base64'
+                });
+            } else {
+                wb = XLSX.read(data, {
+                    type: 'binary'
+                });
+            }
+
+            excelTab = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            console.log(excelTab);
+
+            for( var i = 0; i < excelTab.length; i++ ){
+                var ques = { subject: excelTab[i].科目, grade:excelTab[i].年级, question: excelTab[i].题目,
+                    ans1:excelTab[i].选项1, ans2:excelTab[i].选项2,ans3:excelTab[i].选项3, ans4:excelTab[i].选项4,
+                    trueAns:excelTab[i].正确答案, isDouble:excelTab[i].是否多选, ansAnalyze:excelTab[i].解析};
+                allQues.push(ques);
+            }
+
+            console.log(allQues);
+
+     //       window.location.href='questionShow.html';
+
+        };
+        if(rABS) {
+            reader.readAsArrayBuffer(f);
+        } else {
+            reader.readAsBinaryString(f);
+        }
+
+    }
+
+    function fixdata(data) { //文件流转BinaryString
+        var o = "",
+            l = 0,
+            w = 10240;
+        for(; l < data.byteLength / w; ++l) o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w, l * w + w)));
+        o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w)));
+        return o;
+    }
+
+    $("#next").on('click',function(){
+        sessionStorage.setItem('question',JSON.stringify(allQues));
+        window.location = 'admin-question-preview.html';
+    })
+</script>
+</body>
+</html>

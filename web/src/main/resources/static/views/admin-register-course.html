@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>选择课程</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+    <style>
+        tr:hover{
+            background-color:#a8eb12;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 100%">
+    <div style="width: 100%;text-align: center;">
+        <h3 style="color: #555555;font-weight: bolder;">选择课程</h3>
+    </div>
+    <div style="border: #cccccc 1px solid; width: 100%; height: 120px; margin-top: 70px; border-radius: 10px;">
+        <div style="width: 100%;margin-top: 30px;margin-left: 50px;">
+            <span style="float: left;color: #555555;font-weight: bolder">你已经选择课程：</span>
+            <div style="float: left;margin-left: 20px;" id="course">
+
+            </div>
+        </div>
+        <div style="float: right;margin-top: 40px; margin-right: 30px;">
+            <button class="btn btn-success" style="display: none" id="next">下一步</button>
+        </div>
+    </div>
+
+    <div style="width: 100%;margin-top: 50px;">
+        <table class="table" id="score-table">
+            <thead>
+            <tr style="background: #b2dba1; color: #FFFFFF">
+                <th>序号</th>
+                <th>
+                    <span>班级号</span>
+                </th>
+                <th>
+                    <span>科目</span>
+                    <div style="width: 100%;">
+                        <select id="name" class="form-control" style="width: 100px;margin: 0 auto;" onchange="select()">
+                            <option value="">--选择--</option>
+                            <option>语文</option>
+                            <option>数学</option>
+                            <option>英语</option>
+                            <option>物理</option>
+                            <option>化学</option>
+                            <option>生物</option>
+                        </select>
+                    </div>
+                </th>
+                <th>
+                    <span>年级</span>
+                    <div style="width: 100%;">
+                        <select id="grade" class="form-control" style="width: 100px;margin: 0 auto;" onchange="select()">
+                            <option value="">--选择--</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                        </select>
+                    </div>
+                </th>
+                <th style="width: 200px;">
+                    <span>上课时间</span>
+                </th>
+                <th>
+                    <span>价格</span>
+                </th>
+            </tr>
+            </thead>
+
+            <tbody id="content">
+
+            </tbody>
+        </table>
+
+        <div style="margin-top: 10px;">
+            <button onclick="prePage()" id="prePage" style="display:none;float:left;border-radius: 10px;color: #4cae4c" class="btn btn-default">上一页</button>
+            <button onclick="nextPage()" id="nextPage" style="display:none; float:right;border-radius: 10px;color: #4cae4c" class="btn btn-default">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width: 200px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">输入课程数量</h4>
+            </div>
+            <div class="modal-body">
+                <input class="form-control" id="cour-num" style="margin-left:5px; width: 100%;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" id="modal-sure" class="btn btn-primary">确认</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script>
+
+    var choose = [];
+    var presentObj;
+    var allCourse = [];
+    var courseTime = [];
+    var pageSize = 7;
+    var page = 1;
+    var name = '';
+    var grade = '';
+
+    window.onload = function(){
+        showCourse(page);
+    }
+
+    function showCourse(page){
+        if(page != 1){
+            $("#prePage").css('display','');
+        }else{
+            $("#prePage").css('display','none');
+        }
+        $.ajax({
+            url: "/course/findall/"+page+"/"+pageSize,
+            type: "GET",
+            data:{courName:name,courGrade:grade},
+            dataType:"json",//返回类型值为json
+            success: function(response){
+                if(response.success){
+         //           alert(response.result.r);
+                    if(response.result.r != -1){
+                        $("#nextPage").css('display','');
+                    }else{
+                        $("#nextPage").css('display','none');
+                    }
+                    allCourse = response.result.course;
+                    courseTime = response.result.courseTime;
+                    console.log(allCourse);
+                    console.log(courseTime);
+                    $("#content").empty();
+                    var xuhao = (page-1)*pageSize+1;
+                    for(var i = 0; i < allCourse.length; i++){
+                        var obj = courseTime[i];
+                        var time = [];
+                        for( var j = 0; j < obj.length; j++){
+                            time.push('星期'+obj[j].courWeek+'&nbsp;'+obj[j].courBegin.substring(0,5)+'-'+obj[j].courEnd.substring(0,5));
+                        }
+                        var text='<tr style="color: #9d9d9d" onclick="trObj(this)">\n' +
+                            '                <td>'+xuhao+'</td>\n' +
+                            '                <td>'+allCourse[i].courId+'</td>\n' +
+                            '                <td>'+allCourse[i].courName+'</td>\n' +
+                            '                <td>'+allCourse[i].courGrade+'年级</td>\n' +
+                            '                <td>'+time.join('<br>')+'</td>\n' +
+                            '                <td style="color: #c7254e; font-weight: bolder;">'+allCourse[i].courPrice+'</td>\n' +
+                            '            </tr>'
+                        $("#content").append(text);
+                        xuhao++;
+                    }
+                }else{
+                    alert("查询失败！");
+                }
+            }
+        });
+    }
+
+    function select(){
+        name = $("#name").val();
+        grade = $("#grade").val();
+        showCourse(1);
+    }
+
+    $("#nextPage").on('click',function(){
+        page++;
+        showCourse(page);
+    })
+
+    $("#prePage").on('click',function(){
+        page--;
+        showCourse(page);
+    })
+
+    function trObj(obj){
+        if(!checkCourse($(obj).children().eq(1).text())){
+            alert("已经添加过该课程了！");
+            return;
+        }
+        presentObj = obj;
+        $("#myModal").modal('show');
+    }
+
+    $("#modal-sure").on('click',function(){
+        addCourse(presentObj, $("#cour-num").val())
+    })
+
+    function addCourse(obj, courNum){
+        $("#cour-num").val('');
+        $("#myModal").modal('hide');
+  //      alert(obj);
+        $("#next").css("display",'');
+  //      alert();
+        var course = {courId:$(obj).children().eq(1).text(), courName:$(obj).children().eq(2).text(), courGrade:$(obj).children().eq(3).text(), total:courNum, remain:courNum};
+        choose.push(course);
+        var text = '<div style="float: left;margin-left: 5px;border-radius: 10px;height:20px;background: #cccccc;color: #555555">' +
+                 '&nbsp;'+course.courId+'&nbsp;'+course.courName+'&nbsp;'+course.courGrade  +'&nbsp;<span style="color: #F0433D;font-style: italic">'+course.total+'</span>'+
+             '<button type="button" id="'+course.courId+'" onclick="deleCourse(this)" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>&nbsp;' +
+            '</div>';
+        $("#course").append(text);
+        console.log(choose);
+    }
+
+    function checkCourse(id){
+        var len = choose.length;
+        for( var i = 0; i <len; i++ ){
+            if( choose[i].courId == id ){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function deleCourse(obj){
+        var id = $(obj).attr("id");
+        for( var i = 0; i < choose.length; i++ ){
+            if( choose[i].courId == id ) choose.splice(i,1);
+        }
+        console.log(choose);
+        $(obj).parent().remove();
+        if( choose.length == 0 ){
+            $("#next").css("display",'none');
+        }
+    }
+
+    $("#next").on('click',function(){
+        sessionStorage.setItem('stuCourse',JSON.stringify(choose));
+        window.location = 'admin-register-tuition.html';
+    })
+</script>
+</body>
+</html>

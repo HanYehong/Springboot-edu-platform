@@ -1,0 +1,3 @@
+com\imooc\firstappdemo\config\RouterFunctionConfiguration.class
+com\imooc\firstappdemo\controller\UserController.class
+com\imooc\firstappdemo\FirstAppDemoApplication.class

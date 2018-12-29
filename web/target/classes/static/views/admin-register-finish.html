@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>完成</title>
+    <!-- Bootstrap Styles-->
+    <link href="../assets/css/bootstrap.css" rel="stylesheet" />
+    <!-- FontAwesome Styles-->
+    <link href="../assets/css/font-awesome.css" rel="stylesheet" />
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- My CSS -->
+    <link href="../css/my.css" rel="stylesheet" />
+</head>
+<body>
+<div style="width: 100%;text-align: center;">
+    <h1 style="font-size: 30px;">完成入学！</h1><br><br>
+    <span style="font-size: 18px;font-weight: bolder">你的账号为：</span><span style="color: #F0433D;font-weight: bolder" id="username"></span>
+    <span style="font-size: 18px;margin-left:20px; font-weight: bolder">初始密码为：</span><span style="color: #F0433D;font-weight: bolder" id="password"></span>
+    <br><br><span style="color: #00bf72;font-weight: bolder">（提示：请尽快修改密码）</span>
+</div>
+
+<!-- jQuery Js -->
+<script src="../assets/js/jquery-1.10.2.js"></script>
+<!-- Bootstrap Js -->
+<script src="../assets/js/bootstrap.min.js"></script>
+<script>
+    function GetRequest() {
+        var url =decodeURI(decodeURI(location.search)); //获取url中"?"符后的字串，使用了两次decodeRUI解码
+        var theRequest = new Object();
+        if (url.indexOf("?") != -1) {
+            var str = url.substr(1);
+            strs = str.split("&");
+            for (var i = 0; i < strs.length; i++) {
+                theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+            }
+            return theRequest;
+        }
+    }
+
+    var param = GetRequest();
+    var username = param.username;
+    var password = param.password;
+
+    window.onload = function () {
+        $("#username").text(username);
+        $("#password").text(password);
+    }
+</script>
+</body>
+</html>
